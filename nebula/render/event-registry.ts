@@ -3,7 +3,6 @@ type EventRecord = {
   listener: EventListenerOrEventListenerObject;
 };
 
-// const eventRegistry: EventRecord[] = [];
 const eventRegistry = new WeakMap<Element, EventRecord[]>();
 
 export function addEventListener(
@@ -27,7 +26,7 @@ export function removeEventListeners(targetElement: Element) {
   eventRegistry.delete(targetElement);
 }
 
-export function copyEventListeners(fromElement: Element, toElement: Element) {
+export function copyEventListeners(toElement: Element, fromElement: Element) {
   removeEventListeners(toElement);
 
   const events = getEventListener(fromElement);

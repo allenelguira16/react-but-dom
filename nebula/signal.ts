@@ -1,4 +1,4 @@
-import { jsxNotifier } from "./renderNotifier";
+import { renderObserver } from "./render/render-observer";
 
 // A global to track which computation is currently running
 let currentComputation: (() => void) | null = null;
@@ -8,7 +8,7 @@ type Signal<T> = {
   set: (value: T) => void;
 };
 
-export function signal<T>(initialValue: T): Signal<T> {
+export function state<T>(initialValue: T): Signal<T> {
   let value = initialValue;
   const subscribers = new Set<() => void>();
 
@@ -23,7 +23,7 @@ export function signal<T>(initialValue: T): Signal<T> {
     if (value !== newValue) {
       value = newValue;
       subscribers.forEach(fn => fn());
-      jsxNotifier.update();
+      renderObserver.update();
     }
   }
 

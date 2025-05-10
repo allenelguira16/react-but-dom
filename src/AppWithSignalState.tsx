@@ -1,16 +1,12 @@
 import { MouseEventHandler } from "react";
-import { effect, state } from "../nebula";
+import { effect, state } from "../nebula/signal";
 
-export const App = () => {
-  const [name, setName] = state("");
-  const [count, setCount] = state(0);
-
-  effect(() => {
-    console.log(count);
-  }, [count]);
+export const AppWithSignalState = () => {
+  const name = state("");
+  const count = state(0);
 
   const handleCount: MouseEventHandler<HTMLButtonElement> = () => {
-    setCount(count + 1);
+    count.set(count.get() + 1);
   };
 
   return (
@@ -20,27 +16,25 @@ export const App = () => {
           type="text"
           placeholder="Set your name"
           onInput={(event) => {
-            setName(event.currentTarget.value);
+            name.set(event.currentTarget.value);
           }}
-          value={name}
+          value={name.get()}
         >
           Hi
         </input>
         <button onClick={handleCount}>Increase Counter</button>
       </div>
       <div>
-        <div>Hi my name is {name}</div>
-        <div>Counter: {count}</div>
-        {count > 10 && <div>Fuck you!</div>}
+        <div>Hi my name is {name.get()}</div>
+        <div>Counter: {count.get()}</div>
+        {count.get() > 10 && <div>Fuck you!</div>}
       </div>
-      {/* <ChildApp name={name} count={count} /> */}
+      <ChildApp name={name.get()} count={count.get()} />
     </div>
   );
 };
 
 const ChildApp = ({ name, count }: { name: string; count: number }) => {
-  console.log(count);
-
   return (
     <div>
       <div>Hi my name is {name}</div>

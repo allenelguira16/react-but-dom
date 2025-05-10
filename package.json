@@ -14,7 +14,6 @@
     "vite": "^6.0.5"
   },
   "dependencies": {
-    "morphdom": "^2.7.5",
     "react": "^19.0.0"
   }
 }

@@ -1,4 +1,4 @@
-export const jsxNotifier = (() => {
+export const renderObserver = (() => {
   let subscriber: (() => void) | undefined;
 
   return {

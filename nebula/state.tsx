@@ -1,56 +1,50 @@
-import { jsxNotifier } from "./renderNotifier";
+import { renderObserver } from "./render/render-observer";
 
 export type ComponentContext = {
+  hookIndex: number;
   hooks: any[];
   effects: (() => void)[];
 };
 
-let hookIndex = 0;
-const currentContext: ComponentContext = {
+let currentContext: ComponentContext = {
+  hookIndex: 0,
   hooks: [],
   effects: [],
 };
 
-export function setHookIndex(newHookIndex: number) {
-  hookIndex = newHookIndex;
-}
-
 export function setCurrentContext(newCurrentContext: ComponentContext) {
-  currentContext.effects = newCurrentContext.effects;
-  currentContext.hooks = newCurrentContext.hooks;
+  currentContext = { ...newCurrentContext };
 }
 
 export function state<T>(initial: T): [T, (value: T) => void] {
-  const context = currentContext;
-  const idx = hookIndex++;
+  const idx = currentContext.hookIndex++;
 
-  if (!context.hooks[idx]) {
-    context.hooks[idx] = initial;
+  if (!currentContext.hooks[idx]) {
+    currentContext.hooks[idx] = initial;
   }
 
   const setState = (newVal: T) => {
-    context.hooks[idx] = newVal;
-    jsxNotifier.update();
+    currentContext.hooks[idx] = newVal;
+    renderObserver.update();
   };
 
-  return [context.hooks[idx], setState] as const;
+  return [currentContext.hooks[idx], setState] as const;
 }
 
 export function effect(fn: () => void | (() => void), deps?: any[]) {
-  const context = currentContext!;
-  const idx = hookIndex++;
+  const idx = currentContext.hookIndex++;
 
-  if (!context.hooks[idx]) {
-    context.hooks[idx] = { deps: undefined, cleanup: undefined };
+  if (!currentContext.hooks[idx]) {
+    currentContext.hooks[idx] = { deps: undefined, cleanup: undefined };
   }
 
-  const effectState = context.hooks[idx];
+  const effectState = currentContext.hooks[idx];
   const hasChanged =
     !deps || deps.some((dep, i) => dep !== effectState.deps?.[i]);
 
   if (hasChanged) {
     // Save the effect for later execution after render
-    context.effects.push(() => {
+    currentContext.effects.push(() => {
       // Run cleanup first
       if (typeof effectState.cleanup === "function") {
         effectState.cleanup();

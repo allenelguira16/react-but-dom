@@ -1,22 +1,6 @@
-import { JSX } from "react";
-import { render } from "./render";
-import { jsxNotifier } from "./renderNotifier";
-import { copyEventListeners, getEventListener } from "./event-registry";
+import { copyEventListeners } from "./event-registry";
 
-export async function createApp(target: HTMLElement, vNode: JSX.Element) {
-  let $rootElement: HTMLElement | Text;
-
-  jsxNotifier.watch(() => {
-    if (!$rootElement) {
-      $rootElement = mount(target, render(vNode));
-    } else {
-      const $newNode = render(vNode);
-      patch($rootElement as HTMLElement, $newNode as HTMLElement);
-    }
-  });
-}
-
-function patch($oldNode: HTMLElement, $newNode: HTMLElement): void {
+export function patch($oldNode: HTMLElement, $newNode: HTMLElement): void {
   // If they are not the same tag, replace entirely
   if ($oldNode.tagName !== $newNode.tagName) {
     $oldNode.replaceWith($newNode);
@@ -36,8 +20,8 @@ function patch($oldNode: HTMLElement, $newNode: HTMLElement): void {
     }
   });
 
-  // Remove old listeners
-  copyEventListeners($newNode, $oldNode);
+  // Remove and copy old listener to new node
+  copyEventListeners($oldNode, $newNode);
 
   // Text content node (e.g., <div>Hello</div>)
   if ($oldNode.childNodes.length === 1 && $oldNode.firstChild?.nodeType === Node.TEXT_NODE &&
@@ -68,11 +52,4 @@ function patch($oldNode: HTMLElement, $newNode: HTMLElement): void {
       patch(oldChild as HTMLElement, newChild as HTMLElement);
     }
   }
-}
-
-function mount($target: HTMLElement | Text, $node: HTMLElement | Text) {
-  if ($target instanceof HTMLElement)
-    $target.replaceChildren($node);
-
-  return $node;
 }
